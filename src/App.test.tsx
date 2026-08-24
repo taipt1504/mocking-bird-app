@@ -9,4 +9,12 @@ describe('App', () => {
       screen.getByRole('heading', { name: /va bank app simulator/i, level: 1 }),
     ).toBeInTheDocument()
   })
+
+  it('renders all four panels', () => {
+    render(<App />)
+    expect(screen.getByRole('heading', { name: /^inquiry$/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /^payment$/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /^state$/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /activity log/i })).toBeInTheDocument()
+  })
 })
