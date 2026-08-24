@@ -26,6 +26,29 @@ modifying that service.
 npm test
 ```
 
+## Docker
+
+Production build served as a static SPA behind nginx, which reverse-proxies
+`/mock/*` to `mocking-bird-ms` (the same job the Vite dev-proxy does), so no
+CORS changes are ever needed on that service.
+
+```bash
+docker build -t va-bank-mocking .
+docker run -p 8080:80 -e MOCK_BACKEND_URL=http://<your-mocking-bird-ms-host>:9500 va-bank-mocking
+```
+
+or with Compose (edit `MOCK_BACKEND_URL` in `docker-compose.yml` first):
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:8080`. `MOCK_BACKEND_URL` is read at container
+**start** (via nginx's env-template substitution), not baked into the JS
+bundle — pointing at a different `mocking-bird-ms` instance never requires
+rebuilding the image, only a different `-e MOCK_BACKEND_URL=...` (no
+trailing slash).
+
 ## Manual verification checklist (run against a live mocking-bird-ms)
 
 1. Inquiry on a real dynamic VA → expect ACTIVE + amount shown.

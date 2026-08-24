@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      # Point this at wherever mocking-bird-ms actually runs — a real host,
+      # or http://host.docker.internal:9500 for a mocking-bird-ms running
+      # directly on the Docker host (Docker Desktop only). No trailing slash.
+      MOCK_BACKEND_URL: http://localhost:9500
