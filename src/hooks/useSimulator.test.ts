@@ -32,7 +32,7 @@ describe('useSimulator', () => {
     vi.mocked(api.payment).mockRejectedValue(new Error('network down'))
     const { result } = renderHook(() => useSimulator())
 
-    let thrownError
+    let thrownError: unknown
     await act(async () => {
       try {
         await result.current.runPayment({ vaAcctNo: 'VA123', amount: 1000 })
