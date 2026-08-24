@@ -48,11 +48,17 @@ export function InquiryPanel({ onInquiry }: InquiryPanelProps) {
       </form>
       {error && <p role="alert">{error}</p>}
       {result && (
-        <p data-testid="inquiry-summary">{summarize(result)}</p>
+        <p data-testid="inquiry-summary" className={`callout callout--${summaryTone(result)}`}>
+          {summarize(result)}
+        </p>
       )}
       {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
     </section>
   )
+}
+
+function summaryTone(result: InquiryResponse): 'success' | 'warning' {
+  return result.status === 'ACTIVE' ? 'success' : 'warning'
 }
 
 function summarize(result: InquiryResponse): string {

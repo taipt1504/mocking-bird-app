@@ -135,6 +135,7 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
       </form>
 
       <div className="payment-panel__scenarios">
+        <span className="payment-panel__scenarios-label">Scenarios</span>
         <button type="button" onClick={() => void runDouble()}>
           Double payment
         </button>
@@ -159,24 +160,28 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
       </div>
 
       {results.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Outcome</th>
-              <th>Duration (ms)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((r) => (
-              <tr key={r.index}>
-                <td>{r.index + 1}</td>
-                <td>{r.error ? `Error: ${r.error}` : JSON.stringify(r.response)}</td>
-                <td>{Math.round(r.durationMs)}</td>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Outcome</th>
+                <th>Duration (ms)</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {results.map((r) => (
+                <tr key={r.index}>
+                  <td>{r.index + 1}</td>
+                  <td data-outcome={r.error ? 'error' : 'ok'}>
+                    {r.error ? `Error: ${r.error}` : JSON.stringify(r.response)}
+                  </td>
+                  <td>{Math.round(r.durationMs)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   )

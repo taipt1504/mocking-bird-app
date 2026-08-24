@@ -22,8 +22,10 @@ export function ActivityLog({ log, onClear }: ActivityLogProps) {
             <li key={entry.id} data-status={entry.status}>
               <details>
                 <summary>
-                  <span>{entry.timestamp}</span> <span>{entry.endpoint}</span>{' '}
-                  <span>{entry.status}</span> <span>{entry.durationMs}ms</span>
+                  <span className="log-time">{entry.timestamp}</span>
+                  <span className="log-endpoint">{entry.endpoint}</span>
+                  <span className="log-status">{entry.status}</span>
+                  <span className="log-duration">{entry.durationMs}ms</span>
                 </summary>
                 <pre>
                   {JSON.stringify({ request: entry.request, response: entry.response }, null, 2)}

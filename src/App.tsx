@@ -10,7 +10,12 @@ function App() {
 
   return (
     <main className="app">
-      <h1>VA Bank App Simulator</h1>
+      <header className="topbar">
+        <h1>VA Bank App Simulator</h1>
+        <p className="topbar__subtitle">
+          Simulate a bank app driving VA inquiry and payment flows against the mock TCB backend.
+        </p>
+      </header>
       <div className="app__grid">
         <InquiryPanel onInquiry={runInquiry} />
         <PaymentPanel onPayment={runPayment} />

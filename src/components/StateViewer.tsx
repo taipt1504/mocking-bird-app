@@ -39,51 +39,55 @@ export function StateViewer({ fetchTransactions, fetchRefunds }: StateViewerProp
 
       <h3>Transactions</h3>
       {transactions.error && <p role="alert">Transactions: {transactions.error}</p>}
-      <table>
-        <thead>
-          <tr>
-            <th>VA</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(transactions.data ?? []).map((t) => (
-            <tr key={t.id}>
-              <td>{t.vaAcctNo}</td>
-              <td>{t.amount}</td>
-              <td>{t.status}</td>
-              <td>{t.createdAt}</td>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>VA</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Created</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(transactions.data ?? []).map((t) => (
+              <tr key={t.id}>
+                <td>{t.vaAcctNo}</td>
+                <td>{t.amount}</td>
+                <td data-status={t.status}>{t.status}</td>
+                <td>{t.createdAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h3>Refunds</h3>
       {refunds.error && <p role="alert">Refunds: {refunds.error}</p>}
-      <table>
-        <thead>
-          <tr>
-            <th>Tx ID</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Remark</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(refunds.data ?? []).map((r) => (
-            <tr key={r.id}>
-              <td>{r.txId}</td>
-              <td>{r.amount}</td>
-              <td>{r.status}</td>
-              <td>{r.remark}</td>
-              <td>{r.createdAt}</td>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Tx ID</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Remark</th>
+              <th>Created</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(refunds.data ?? []).map((r) => (
+              <tr key={r.id}>
+                <td>{r.txId}</td>
+                <td>{r.amount}</td>
+                <td data-status={r.status}>{r.status}</td>
+                <td>{r.remark}</td>
+                <td>{r.createdAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   )
 }
