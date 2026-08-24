@@ -32,7 +32,11 @@ export function useSimulator() {
   const [log, setLog] = useState<LogEntry[]>(() => loadLog())
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(log))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(log))
+    } catch {
+      // storage can be full or unavailable (e.g. private browsing) — the log is a convenience, not critical state
+    }
   }, [log])
 
   const appendLog = useCallback((entry: LogEntry) => {
@@ -90,16 +94,15 @@ export function useSimulator() {
     [record],
   )
 
-  const fetchTransactions = useCallback(
-    () =>
-      record<undefined, Transaction[]>('transactions', undefined, () => api.listTransactions()),
-    [record],
-  )
+  const fetchTransactions = useCallback(async () => {
+    const { data } = await api.listTransactions()
+    return data
+  }, [])
 
-  const fetchRefunds = useCallback(
-    () => record<undefined, Refund[]>('refunds', undefined, () => api.listRefunds()),
-    [record],
-  )
+  const fetchRefunds = useCallback(async () => {
+    const { data } = await api.listRefunds()
+    return data
+  }, [])
 
   return { log, clearLog, runInquiry, runPayment, fetchTransactions, fetchRefunds }
 }

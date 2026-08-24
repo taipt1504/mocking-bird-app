@@ -55,6 +55,18 @@ describe('PaymentPanel', () => {
     expect(onPayment).toHaveBeenCalledWith(expect.objectContaining({ amount: 1001 }))
   })
 
+  it('still fires at least one concurrent payment when the N field is cleared', async () => {
+    const onPayment = vi.fn().mockResolvedValue({ result: 'NOTIFIED' })
+    render(<PaymentPanel onPayment={onPayment} />)
+
+    await userEvent.type(screen.getByLabelText(/va number/i), 'VA123')
+    await userEvent.type(screen.getByLabelText(/amount/i), '1000')
+    await userEvent.clear(screen.getByLabelText('N'))
+    await userEvent.click(screen.getByRole('button', { name: /concurrent payment/i }))
+
+    await waitFor(() => expect(onPayment).toHaveBeenCalled())
+  })
+
   it('overrides the VA number for the invalid-VA preset', async () => {
     const onPayment = vi.fn().mockResolvedValue({ result: 'NOTIFIED' })
     render(<PaymentPanel onPayment={onPayment} />)

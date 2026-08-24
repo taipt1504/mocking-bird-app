@@ -2,13 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function usePolling<T>(fetcher: () => Promise<T>, intervalMs = 3000) {
   const [data, setData] = useState<T | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [enabled, setEnabled] = useState(false)
   const fetcherRef = useRef(fetcher)
   fetcherRef.current = fetcher
 
   const refresh = useCallback(async () => {
-    const result = await fetcherRef.current()
-    setData(result)
+    try {
+      const result = await fetcherRef.current()
+      setError(null)
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    }
   }, [])
 
   useEffect(() => {
@@ -19,5 +25,5 @@ export function usePolling<T>(fetcher: () => Promise<T>, intervalMs = 3000) {
     return () => clearInterval(id)
   }, [enabled, intervalMs, refresh])
 
-  return { data, refresh, enabled, setEnabled }
+  return { data, error, refresh, enabled, setEnabled }
 }

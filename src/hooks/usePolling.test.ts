@@ -48,4 +48,23 @@ describe('usePolling', () => {
     expect(fetcher).toHaveBeenCalledTimes(1)
     expect(result.current.data).toEqual(['a'])
   })
+
+  it('sets error on a failed refresh and clears it on a subsequent success', async () => {
+    const fetcher = vi.fn().mockRejectedValueOnce(new Error('network down')).mockResolvedValueOnce(['a'])
+    const { result } = renderHook(() => usePolling(fetcher, 1000))
+
+    await act(async () => {
+      await result.current.refresh()
+    })
+
+    expect(result.current.error).toBe('network down')
+    expect(result.current.data).toBeNull()
+
+    await act(async () => {
+      await result.current.refresh()
+    })
+
+    expect(result.current.error).toBeNull()
+    expect(result.current.data).toEqual(['a'])
+  })
 })

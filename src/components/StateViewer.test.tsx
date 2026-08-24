@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StateViewer } from './StateViewer'
 
@@ -36,5 +36,41 @@ describe('StateViewer', () => {
 
     expect(fetchTransactions).not.toHaveBeenCalled()
     expect(fetchRefunds).not.toHaveBeenCalled()
+  })
+
+  it('shows an alert when a Refresh fails', async () => {
+    const fetchTransactions = vi.fn().mockRejectedValue(new Error('network down'))
+    const fetchRefunds = vi.fn().mockResolvedValue([])
+
+    render(<StateViewer fetchTransactions={fetchTransactions} fetchRefunds={fetchRefunds} />)
+    await userEvent.click(screen.getByRole('button', { name: /refresh/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('network down')
+  })
+
+  describe('auto-poll', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('enables polling for both transactions and refunds when the auto-poll checkbox is checked', async () => {
+      const fetchTransactions = vi.fn().mockResolvedValue([])
+      const fetchRefunds = vi.fn().mockResolvedValue([])
+
+      render(<StateViewer fetchTransactions={fetchTransactions} fetchRefunds={fetchRefunds} />)
+
+      fireEvent.click(screen.getByRole('checkbox', { name: /auto-poll/i }))
+
+      await act(async () => {
+        vi.advanceTimersByTime(3000)
+      })
+
+      expect(fetchTransactions).toHaveBeenCalled()
+      expect(fetchRefunds).toHaveBeenCalled()
+    })
   })
 })

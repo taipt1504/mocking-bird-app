@@ -70,7 +70,8 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
 
   async function runConcurrent() {
     const request = buildRequest()
-    const calls = Array.from({ length: concurrency }, (_, index) => runOne(index, request))
+    const count = Math.max(1, concurrency)
+    const calls = Array.from({ length: count }, (_, index) => runOne(index, request))
     setResults(await Promise.all(calls))
   }
 

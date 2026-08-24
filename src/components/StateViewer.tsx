@@ -38,6 +38,7 @@ export function StateViewer({ fetchTransactions, fetchRefunds }: StateViewerProp
       </div>
 
       <h3>Transactions</h3>
+      {transactions.error && <p role="alert">Transactions: {transactions.error}</p>}
       <table>
         <thead>
           <tr>
@@ -60,6 +61,7 @@ export function StateViewer({ fetchTransactions, fetchRefunds }: StateViewerProp
       </table>
 
       <h3>Refunds</h3>
+      {refunds.error && <p role="alert">Refunds: {refunds.error}</p>}
       <table>
         <thead>
           <tr>
