@@ -97,11 +97,11 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
       <form onSubmit={handleSubmit}>
         <label>
           VA number
-          <input value={vaAcctNo} onChange={(e) => setVaAcctNo(e.target.value)} required />
+          <input value={vaAcctNo} onChange={(e) => setVaAcctNo(e.target.value)} />
         </label>
         <label>
           Amount
-          <input value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <input value={amount} onChange={(e) => setAmount(e.target.value)} />
         </label>
         <label>
           Sender account

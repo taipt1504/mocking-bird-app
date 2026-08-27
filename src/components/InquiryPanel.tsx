@@ -34,7 +34,7 @@ export function InquiryPanel({ onInquiry }: InquiryPanelProps) {
       <form onSubmit={handleSubmit}>
         <label>
           VA number
-          <input value={vaAcctNo} onChange={(e) => setVaAcctNo(e.target.value)} required />
+          <input value={vaAcctNo} onChange={(e) => setVaAcctNo(e.target.value)} />
         </label>
         <label>
           Service ID
