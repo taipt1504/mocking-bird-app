@@ -3,10 +3,19 @@ import { InquiryPanel } from './components/InquiryPanel'
 import { PaymentPanel } from './components/PaymentPanel'
 import { ActivityLog } from './components/ActivityLog'
 import { StateViewer } from './components/StateViewer'
+import { RawCallbackPanel } from './components/RawCallbackPanel'
 
 function App() {
-  const { log, clearLog, runInquiry, runPayment, fetchTransactions, fetchRefunds } =
-    useSimulator()
+  const {
+    log,
+    clearLog,
+    runInquiry,
+    runPayment,
+    runRawNotification,
+    runRawRefundStatus,
+    fetchTransactions,
+    fetchRefunds,
+  } = useSimulator()
 
   return (
     <main className="app">
@@ -21,6 +30,10 @@ function App() {
         <PaymentPanel onPayment={runPayment} />
         <StateViewer fetchTransactions={fetchTransactions} fetchRefunds={fetchRefunds} />
       </div>
+      <RawCallbackPanel
+        onRawNotification={runRawNotification}
+        onRawRefundStatus={runRawRefundStatus}
+      />
       <ActivityLog log={log} onClear={clearLog} />
     </main>
   )

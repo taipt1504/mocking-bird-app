@@ -94,6 +94,18 @@ export function useSimulator() {
     [record],
   )
 
+  const runRawNotification = useCallback(
+    (body: unknown) =>
+      record<unknown, unknown>('callback', body, () => api.rawNotification(body)),
+    [record],
+  )
+
+  const runRawRefundStatus = useCallback(
+    (body: unknown) =>
+      record<unknown, unknown>('callback/refund', body, () => api.rawRefundStatus(body)),
+    [record],
+  )
+
   const fetchTransactions = useCallback(async () => {
     const { data } = await api.listTransactions()
     return data
@@ -104,5 +116,14 @@ export function useSimulator() {
     return data
   }, [])
 
-  return { log, clearLog, runInquiry, runPayment, fetchTransactions, fetchRefunds }
+  return {
+    log,
+    clearLog,
+    runInquiry,
+    runPayment,
+    runRawNotification,
+    runRawRefundStatus,
+    fetchTransactions,
+    fetchRefunds,
+  }
 }

@@ -36,6 +36,19 @@ export function payment(body: PaymentRequest) {
   return post<PaymentRequest, PaymentResponse>('/api/v1/public/simulate/tcb-va/payment', body)
 }
 
+/**
+ * Passthrough endpoints: the body IS the document va-ms receives, so the caller owns every
+ * field (several Itm, a repeated MsgId to force TN-001, an unknown VA for TN-003, or a
+ * status/remark pair the scripted refund push never emits).
+ */
+export function rawNotification(body: unknown) {
+  return post<unknown, unknown>('/api/v1/public/simulate/tcb-va/callback', body)
+}
+
+export function rawRefundStatus(body: unknown) {
+  return post<unknown, unknown>('/api/v1/public/simulate/tcb-va/callback/refund', body)
+}
+
 export function listTransactions() {
   return get<Transaction[]>('/api/v1/public/simulate/tcb-va/transactions')
 }

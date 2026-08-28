@@ -1,0 +1,102 @@
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { RawCallbackPanel } from './RawCallbackPanel'
+
+function renderPanel() {
+  const onRawNotification = vi.fn().mockResolvedValue({ errorCode: '00' })
+  const onRawRefundStatus = vi.fn().mockResolvedValue({ errorCode: '00' })
+  render(
+    <RawCallbackPanel
+      onRawNotification={onRawNotification}
+      onRawRefundStatus={onRawRefundStatus}
+    />,
+  )
+  return { onRawNotification, onRawRefundStatus }
+}
+
+function editor() {
+  return screen.getByLabelText(/request json/i) as HTMLTextAreaElement
+}
+
+describe('RawCallbackPanel', () => {
+  it('builds a notification document carrying the per-item Id and EndToEndId', async () => {
+    renderPanel()
+
+    await userEvent.clear(screen.getByLabelText('MsgId'))
+    await userEvent.type(screen.getByLabelText('MsgId'), 'QA-MSG-1')
+    await userEvent.clear(screen.getAllByLabelText('Id')[0])
+    await userEvent.type(screen.getAllByLabelText('Id')[0], 'QA-1')
+    await userEvent.clear(screen.getAllByLabelText('EndToEndId')[0])
+    await userEvent.type(screen.getAllByLabelText('EndToEndId')[0], 'FT-QA-1')
+    await userEvent.type(screen.getAllByLabelText(/va number/i)[0], '7712398C01231')
+    await userEvent.type(screen.getAllByLabelText(/amount/i)[0], '200000')
+
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+
+    expect(JSON.parse(editor().value)).toMatchObject({
+      NtfctnToRcv: {
+        GrpHdr: { MsgId: 'QA-MSG-1' },
+        Ntfctn: {
+          Itm: [
+            {
+              Id: 'QA-1',
+              EndToEndId: 'FT-QA-1',
+              Amt: { Value: 200000, Ccy: 'VND' },
+              RltdAcct: { Id: { Othr: { Id: '7712398C01231' } } },
+            },
+          ],
+        },
+      },
+    })
+  })
+
+  it('builds one Itm entry per added item, each with its own Id', async () => {
+    renderPanel()
+
+    await userEvent.click(screen.getByRole('button', { name: /add itm/i }))
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+
+    const parsed = JSON.parse(editor().value)
+    expect(parsed.NtfctnToRcv.Ntfctn.Itm).toHaveLength(2)
+    expect(parsed.NtfctnToRcv.Ntfctn.Itm[0].Id).not.toBe(parsed.NtfctnToRcv.Ntfctn.Itm[1].Id)
+  })
+
+  it('sends the editor contents verbatim to the notification endpoint', async () => {
+    const { onRawNotification } = renderPanel()
+
+    await userEvent.clear(editor())
+    await userEvent.type(editor(), '{{"hand":"written"}')
+    await userEvent.click(screen.getByRole('button', { name: /^send$/i }))
+
+    await waitFor(() => expect(onRawNotification).toHaveBeenCalledWith({ hand: 'written' }))
+  })
+
+  it('reports invalid JSON and sends nothing', async () => {
+    const { onRawNotification } = renderPanel()
+
+    await userEvent.clear(editor())
+    await userEvent.type(editor(), 'not json')
+    await userEvent.click(screen.getByRole('button', { name: /^send$/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/json/i)
+    expect(onRawNotification).not.toHaveBeenCalled()
+  })
+
+  it('sends to the refund-status endpoint in refund mode, with the chosen status/remark', async () => {
+    const { onRawRefundStatus, onRawNotification } = renderPanel()
+
+    await userEvent.click(screen.getByRole('button', { name: /refund status/i }))
+    await userEvent.clear(screen.getByLabelText('partId'))
+    await userEvent.type(screen.getByLabelText('partId'), 'REF-001')
+    await userEvent.click(screen.getByRole('button', { name: /^denied$/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^send$/i }))
+
+    await waitFor(() =>
+      expect(onRawRefundStatus).toHaveBeenCalledWith({
+        txSts: [expect.objectContaining({ partId: 'REF-001', status: 'DENIED', remark: 'DENIED' })],
+      }),
+    )
+    expect(onRawNotification).not.toHaveBeenCalled()
+  })
+})

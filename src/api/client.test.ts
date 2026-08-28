@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { inquiry, payment, listTransactions, listRefunds } from './client'
+import {
+  inquiry,
+  payment,
+  rawNotification,
+  rawRefundStatus,
+  listTransactions,
+  listRefunds,
+} from './client'
 
 function mockFetchOnce(status: number, data: unknown) {
   global.fetch = vi.fn().mockResolvedValue({
@@ -35,6 +42,28 @@ describe('api client', () => {
       expect.objectContaining({ method: 'POST' }),
     )
     expect(result.data).toEqual({ result: 'NOTIFIED' })
+  })
+
+  it('rawNotification posts the body verbatim to the callback path', async () => {
+    mockFetchOnce(200, { errorCode: '00' })
+    const body = { NtfctnToRcv: { GrpHdr: { MsgId: 'QA-MSG-1' } } }
+    const result = await rawNotification(body)
+    expect(fetch).toHaveBeenCalledWith(
+      '/mock/api/v1/public/simulate/tcb-va/callback',
+      expect.objectContaining({ method: 'POST', body: JSON.stringify(body) }),
+    )
+    expect(result.data).toEqual({ errorCode: '00' })
+  })
+
+  it('rawRefundStatus posts the body verbatim to the refund callback path', async () => {
+    mockFetchOnce(200, { errorCode: '00' })
+    const body = { txSts: [{ partId: 'REF-001', status: 'DENIED' }] }
+    const result = await rawRefundStatus(body)
+    expect(fetch).toHaveBeenCalledWith(
+      '/mock/api/v1/public/simulate/tcb-va/callback/refund',
+      expect.objectContaining({ method: 'POST', body: JSON.stringify(body) }),
+    )
+    expect(result.data).toEqual({ errorCode: '00' })
   })
 
   it('listTransactions GETs the transactions path', async () => {

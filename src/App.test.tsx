@@ -10,11 +10,12 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders all four panels', () => {
+  it('renders all five panels', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: /^inquiry$/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /^payment$/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /^state$/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /raw callback/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /activity log/i })).toBeInTheDocument()
   })
 })
