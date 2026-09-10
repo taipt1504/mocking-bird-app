@@ -13,6 +13,8 @@ interface ItemFields {
   vaAcctNo: string
   amount: string
   currency: string
+  senderAcct: string
+  senderName: string
 }
 
 interface RefundFields {
@@ -40,6 +42,8 @@ function newItem(n: number): ItemFields {
     vaAcctNo: '',
     amount: '',
     currency: 'VND',
+    senderAcct: '19035979259245',
+    senderName: 'NGUYEN VAN A',
   }
 }
 
@@ -51,6 +55,9 @@ function buildNotification(msgId: string, creDtTm: string, items: ItemFields[]) 
         Itm: items.map((item) => ({
           Id: item.id,
           EndToEndId: item.endToEndId,
+          // va-ms reads this array by position: [0] sender account, [1] sender name. Both slots
+          // are always emitted, blank included, so an empty account never shifts the name into it.
+          Acct: { Prxy: { Id: [item.senderAcct, item.senderName] } },
           Amt: { Value: Number(item.amount), Ccy: item.currency },
           RltdAcct: { Id: { Othr: { Id: item.vaAcctNo } } },
         })),
@@ -225,6 +232,20 @@ export function RawCallbackPanel({
                 <input
                   value={item.currency}
                   onChange={(e) => updateItem(index, { currency: e.target.value })}
+                />
+              </label>
+              <label>
+                Sender account
+                <input
+                  value={item.senderAcct}
+                  onChange={(e) => updateItem(index, { senderAcct: e.target.value })}
+                />
+              </label>
+              <label>
+                Sender name
+                <input
+                  value={item.senderName}
+                  onChange={(e) => updateItem(index, { senderName: e.target.value })}
                 />
               </label>
               {items.length > 1 && (

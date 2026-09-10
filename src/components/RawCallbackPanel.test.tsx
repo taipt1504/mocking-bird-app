@@ -51,6 +51,38 @@ describe('RawCallbackPanel', () => {
     })
   })
 
+  it('places sender account and sender name in Acct.Prxy.Id by position', async () => {
+    renderPanel()
+
+    await userEvent.clear(screen.getAllByLabelText(/sender account/i)[0])
+    await userEvent.type(screen.getAllByLabelText(/sender account/i)[0], '19035979259245')
+    await userEvent.clear(screen.getAllByLabelText(/sender name/i)[0])
+    await userEvent.type(screen.getAllByLabelText(/sender name/i)[0], 'NGUYEN VAN A')
+
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+
+    // va-ms reads this array by index (SENDER_ACCOUNT = 0, SENDER_NAME = 1), so order matters.
+    expect(JSON.parse(editor().value).NtfctnToRcv.Ntfctn.Itm[0].Acct.Prxy.Id).toEqual([
+      '19035979259245',
+      'NGUYEN VAN A',
+    ])
+  })
+
+  it('keeps both sender slots when one is blank, so the positions never shift', async () => {
+    renderPanel()
+
+    await userEvent.clear(screen.getAllByLabelText(/sender account/i)[0])
+    await userEvent.clear(screen.getAllByLabelText(/sender name/i)[0])
+    await userEvent.type(screen.getAllByLabelText(/sender name/i)[0], 'NGUYEN VAN A')
+
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+
+    expect(JSON.parse(editor().value).NtfctnToRcv.Ntfctn.Itm[0].Acct.Prxy.Id).toEqual([
+      '',
+      'NGUYEN VAN A',
+    ])
+  })
+
   it('builds one Itm entry per added item, each with its own Id', async () => {
     renderPanel()
 
