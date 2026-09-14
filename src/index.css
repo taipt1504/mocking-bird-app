@@ -450,6 +450,11 @@ li[data-status="error"] .log-status {
   align-items: end;
 }
 
+.raw-callback__fields .raw-callback__hint {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .raw-callback__fields > label {
   display: flex;
   flex-direction: column;

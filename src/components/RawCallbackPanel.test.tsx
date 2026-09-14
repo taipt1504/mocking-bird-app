@@ -119,16 +119,36 @@ describe('RawCallbackPanel', () => {
     const { onRawRefundStatus, onRawNotification } = renderPanel()
 
     await userEvent.click(screen.getByRole('button', { name: /refund status/i }))
-    await userEvent.clear(screen.getByLabelText('partId'))
-    await userEvent.type(screen.getByLabelText('partId'), 'REF-001')
+    await userEvent.clear(screen.getByLabelText(/tcb partner id/i))
+    await userEvent.type(screen.getByLabelText(/tcb partner id/i), 'WINMONEY')
+    await userEvent.clear(screen.getByLabelText('txId'))
+    await userEvent.type(screen.getByLabelText('txId'), '005804899818053632')
     await userEvent.click(screen.getByRole('button', { name: /^denied$/i }))
     await userEvent.click(screen.getByRole('button', { name: /^send$/i }))
 
     await waitFor(() =>
       expect(onRawRefundStatus).toHaveBeenCalledWith({
-        txSts: [expect.objectContaining({ partId: 'REF-001', status: 'DENIED', remark: 'DENIED' })],
+        txSts: [
+          expect.objectContaining({
+            partId: 'WINMONEY.005804899818053632',
+            status: 'DENIED',
+            remark: 'DENIED',
+          }),
+        ],
       }),
     )
     expect(onRawNotification).not.toHaveBeenCalled()
+  })
+
+  it('sends a bare txId as partId when no partner id is given', async () => {
+    renderPanel()
+
+    await userEvent.click(screen.getByRole('button', { name: /refund status/i }))
+    await userEvent.clear(screen.getByLabelText(/tcb partner id/i))
+    await userEvent.clear(screen.getByLabelText('txId'))
+    await userEvent.type(screen.getByLabelText('txId'), '005804899818053632')
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+
+    expect(JSON.parse(editor().value).txSts[0].partId).toBe('005804899818053632')
   })
 })

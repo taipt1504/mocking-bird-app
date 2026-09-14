@@ -18,7 +18,8 @@ interface ItemFields {
 }
 
 interface RefundFields {
-  partId: string
+  partnerId: string
+  txId: string
   channel: string
   status: string
   remark: string
@@ -66,11 +67,21 @@ function buildNotification(msgId: string, creDtTm: string, items: ItemFields[]) 
   }
 }
 
+/**
+ * TCB echoes the refund correlation key as {@code TCB_PARTNER_ID.txId} — e.g.
+ * {@code WINMONEY.005804899818053632} for a refund va-ms initiated with txId
+ * {@code 005804899818053632}. Leaving the partner id blank sends the bare txId instead, which is
+ * the shape va-ms's own matcher parses today.
+ */
+function refundPartId(fields: RefundFields): string {
+  return fields.partnerId ? `${fields.partnerId}.${fields.txId}` : fields.txId
+}
+
 function buildRefund(fields: RefundFields) {
   return {
     txSts: [
       {
-        partId: fields.partId,
+        partId: refundPartId(fields),
         channel: fields.channel,
         status: fields.status,
         remark: fields.remark,
@@ -92,7 +103,8 @@ export function RawCallbackPanel({
   const [msgId, setMsgId] = useState('QA-MSG-1')
   const [items, setItems] = useState<ItemFields[]>([newItem(1)])
   const [refund, setRefund] = useState<RefundFields>({
-    partId: 'REF-001',
+    partnerId: 'WINMONEY',
+    txId: '005804899818053632',
     channel: 'CITAD',
     status: 'COMPLETED',
     remark: 'AUTH',
@@ -274,12 +286,23 @@ export function RawCallbackPanel({
       ) : (
         <div className="raw-callback__fields">
           <label>
-            partId
+            TCB partner ID
             <input
-              value={refund.partId}
-              onChange={(e) => setRefund({ ...refund, partId: e.target.value })}
+              value={refund.partnerId}
+              onChange={(e) => setRefund({ ...refund, partnerId: e.target.value })}
             />
           </label>
+          <label>
+            txId
+            <input
+              value={refund.txId}
+              onChange={(e) => setRefund({ ...refund, txId: e.target.value })}
+            />
+          </label>
+          <p className="raw-callback__hint">
+            partId sent: <code>{refundPartId(refund)}</code> — clear the partner ID to send the
+            bare txId instead.
+          </p>
           <label>
             channel
             <input
