@@ -68,6 +68,31 @@ describe('RawCallbackPanel', () => {
     ])
   })
 
+  it('places the master account in Acct.Id.Othr.Id, defaulting to the first suggestion', async () => {
+    renderPanel()
+
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+    expect(JSON.parse(editor().value).NtfctnToRcv.Ntfctn.Itm[0].Acct.Id).toEqual({
+      Othr: { Id: '19034751711177' },
+    })
+
+    await userEvent.clear(screen.getAllByLabelText(/master account/i)[0])
+    await userEvent.type(screen.getAllByLabelText(/master account/i)[0], '19000000000001')
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+    expect(JSON.parse(editor().value).NtfctnToRcv.Ntfctn.Itm[0].Acct.Id.Othr.Id).toBe(
+      '19000000000001',
+    )
+  })
+
+  it('omits Acct.Id when the master account is blank', async () => {
+    renderPanel()
+
+    await userEvent.clear(screen.getAllByLabelText(/master account/i)[0])
+    await userEvent.click(screen.getByRole('button', { name: /build json/i }))
+
+    expect(JSON.parse(editor().value).NtfctnToRcv.Ntfctn.Itm[0].Acct).not.toHaveProperty('Id')
+  })
+
   it('keeps both sender slots when one is blank, so the positions never shift', async () => {
     renderPanel()
 

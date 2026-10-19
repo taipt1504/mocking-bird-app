@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { PaymentRequest, PaymentResponse } from '../types'
+import { MASTER_ACCOUNT_SUGGESTIONS } from '../masterAccounts'
 
 interface PaymentPanelProps {
   onPayment: (body: PaymentRequest) => Promise<PaymentResponse>
@@ -23,6 +24,7 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
   const [narrative, setNarrative] = useState('')
   const [channel, setChannel] = useState('')
   const [currency, setCurrency] = useState('')
+  const [masterAccount, setMasterAccount] = useState('')
   const [inquiryFirst, setInquiryFirst] = useState(true)
   const [concurrency, setConcurrency] = useState(5)
   const [results, setResults] = useState<BatchResult[]>([])
@@ -36,6 +38,7 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
       narrative: narrative || undefined,
       channel: channel || undefined,
       currency: currency || undefined,
+      masterAccount: masterAccount || undefined,
       inquiryFirst,
       ...overrides,
     }
@@ -123,6 +126,19 @@ export function PaymentPanel({ onPayment }: PaymentPanelProps) {
           Currency
           <input value={currency} onChange={(e) => setCurrency(e.target.value)} />
         </label>
+        <label>
+          Master account
+          <input
+            list="payment-master-accounts"
+            value={masterAccount}
+            onChange={(e) => setMasterAccount(e.target.value)}
+          />
+        </label>
+        <datalist id="payment-master-accounts">
+          {MASTER_ACCOUNT_SUGGESTIONS.map((acct) => (
+            <option key={acct} value={acct} />
+          ))}
+        </datalist>
         <label>
           <input
             type="checkbox"

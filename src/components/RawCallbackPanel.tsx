@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MASTER_ACCOUNT_SUGGESTIONS } from '../masterAccounts'
 
 interface RawCallbackPanelProps {
   onRawNotification: (body: unknown) => Promise<unknown>
@@ -15,6 +16,7 @@ interface ItemFields {
   currency: string
   senderAcct: string
   senderName: string
+  masterAcct: string
 }
 
 interface RefundFields {
@@ -45,6 +47,7 @@ function newItem(n: number): ItemFields {
     currency: 'VND',
     senderAcct: '19035979259245',
     senderName: 'NGUYEN VAN A',
+    masterAcct: MASTER_ACCOUNT_SUGGESTIONS[0],
   }
 }
 
@@ -58,7 +61,11 @@ function buildNotification(msgId: string, creDtTm: string, items: ItemFields[]) 
           EndToEndId: item.endToEndId,
           // va-ms reads this array by position: [0] sender account, [1] sender name. Both slots
           // are always emitted, blank included, so an empty account never shifts the name into it.
-          Acct: { Prxy: { Id: [item.senderAcct, item.senderName] } },
+          Acct: {
+            // A blank master account drops Acct.Id entirely, to send a notification without one.
+            ...(item.masterAcct ? { Id: { Othr: { Id: item.masterAcct } } } : {}),
+            Prxy: { Id: [item.senderAcct, item.senderName] },
+          },
           Amt: { Value: Number(item.amount), Ccy: item.currency },
           RltdAcct: { Id: { Othr: { Id: item.vaAcctNo } } },
         })),
@@ -260,6 +267,14 @@ export function RawCallbackPanel({
                   onChange={(e) => updateItem(index, { senderName: e.target.value })}
                 />
               </label>
+              <label>
+                Master account
+                <input
+                  list="raw-master-accounts"
+                  value={item.masterAcct}
+                  onChange={(e) => updateItem(index, { masterAcct: e.target.value })}
+                />
+              </label>
               {items.length > 1 && (
                 <button
                   type="button"
@@ -270,6 +285,12 @@ export function RawCallbackPanel({
               )}
             </fieldset>
           ))}
+
+          <datalist id="raw-master-accounts">
+            {MASTER_ACCOUNT_SUGGESTIONS.map((acct) => (
+              <option key={acct} value={acct} />
+            ))}
+          </datalist>
 
           <div className="raw-callback__actions">
             <button

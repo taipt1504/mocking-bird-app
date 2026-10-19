@@ -30,6 +30,7 @@ export interface PaymentRequest {
   channel?: string
   currency?: string
   vaName?: string
+  masterAccount?: string
   inquiryFirst?: boolean
 }
 

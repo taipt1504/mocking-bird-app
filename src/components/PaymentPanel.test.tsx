@@ -18,6 +18,27 @@ describe('PaymentPanel', () => {
     )
   })
 
+  it('sends the master account, accepting a value outside the suggestions', async () => {
+    const onPayment = vi.fn().mockResolvedValue({ result: 'NOTIFIED' })
+    render(<PaymentPanel onPayment={onPayment} />)
+
+    expect(
+      Array.from(document.querySelectorAll('#payment-master-accounts option')).map(
+        (o) => (o as HTMLOptionElement).value,
+      ),
+    ).toEqual(['19034751711177', '19034751711169'])
+
+    await userEvent.type(screen.getByLabelText(/va number/i), 'VA123')
+    await userEvent.type(screen.getByLabelText(/amount/i), '1000')
+    await userEvent.type(screen.getByLabelText(/master account/i), '19000000000001')
+    await userEvent.click(screen.getByRole('button', { name: /^single payment$/i }))
+
+    await waitFor(() => expect(onPayment).toHaveBeenCalledTimes(1))
+    expect(onPayment).toHaveBeenCalledWith(
+      expect.objectContaining({ masterAccount: '19000000000001' }),
+    )
+  })
+
   it('runs two sequential payments for the double-payment preset', async () => {
     const onPayment = vi.fn().mockResolvedValue({ result: 'NOTIFIED' })
     render(<PaymentPanel onPayment={onPayment} />)
